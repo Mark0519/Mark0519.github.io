@@ -315,6 +315,83 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mark0519.github.io/2021/08/04/pwn-SROP/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="mark0519">
+      <meta itemprop="description" content="大一在读，菜鸡pwn手~">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Mark`s blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/08/04/pwn-SROP/" class="post-title-link" itemprop="url">pwn-SROP</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-08-04 21:12:38 / 修改时间：20:18:26" itemprop="dateCreated datePublished" datetime="2021-08-04T21:12:38+08:00">2021-08-04</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="SROP"><a href="#SROP" class="headerlink" title="SROP"></a>SROP</h1><h2 id="srop原理"><a href="#srop原理" class="headerlink" title="srop原理"></a>srop原理</h2><p>内核在 signal 信号处理的过程中，内核主要做的工作就是为进程保存上下文，并且恢复上下文。这个主要的变动都在 Signal Frame 中。但是需要注意的是：</p>
+<ul>
+<li>Signal Frame 被保存在用户的地址空间中，所以用户是可以读写的。</li>
+<li>由于内核与信号处理程序无关 (kernel agnostic about signal handlers)，它并不会去记录这个 signal 对应的 Signal Frame，所以当执行 sigreturn 系统调用时，此时的 Signal Frame 并不一定是之前内核为用户进程保存的 Signal Frame。</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/08/04/pwn-SROP/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://mark0519.github.io/2021/08/01/pwn-DASCTF-July-EasyHeap/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -871,79 +948,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/07/18/pwn-ret2dl/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mark0519.github.io/2021/07/17/pwn-overlap-1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="mark0519">
-      <meta itemprop="description" content="大一在读，菜鸡pwn手~">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Mark`s blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/07/17/pwn-overlap-1/" class="post-title-link" itemprop="url">pwn-overlap(1)</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-07-17 18:27:26 / 修改时间：18:52:29" itemprop="dateCreated datePublished" datetime="2021-07-17T18:27:26+08:00">2021-07-17</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="extend-和-overlap"><a href="#extend-和-overlap" class="headerlink" title="extend 和 overlap"></a>extend 和 overlap</h1><p>之前学习过extend和overlap，但一直不能灵活使用，趁现在有空系统的复习下并尝试做几道题</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/07/17/pwn-overlap-1/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
