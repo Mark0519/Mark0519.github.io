@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"mark0519.github.io","root":"/","scheme":"Pisces","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+
+  <meta name="description" content="how2heap libc-2.230x00 pre一直没有好好学过how2heap QAQ 是时候好好整理下这玩意了，就从libc- 2.23开始吧！">
+<meta property="og:type" content="article">
+<meta property="og:title" content="pwn-how2heap-2.23">
+<meta property="og:url" content="https://mark0519.github.io/2021/08/12/pwn-how2heap-2-23/index.html">
+<meta property="og:site_name" content="Mark&#96;s blog">
+<meta property="og:description" content="how2heap libc-2.230x00 pre一直没有好好学过how2heap QAQ 是时候好好整理下这玩意了，就从libc- 2.23开始吧！">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic.imgdb.cn/item/61151a175132923bf82e251f.jpg">
+<meta property="og:image" content="https://pic.imgdb.cn/item/61151b705132923bf83119bc.jpg">
+<meta property="og:image" content="https://pic.imgdb.cn/item/61151c015132923bf8324cbc.jpg">
+<meta property="og:image" content="https://pic.imgdb.cn/item/6115230a5132923bf841ca97.jpg">
+<meta property="article:published_time" content="2021-08-12T12:37:28.000Z">
+<meta property="article:modified_time" content="2021-08-12T14:13:31.849Z">
+<meta property="article:author" content="mark0519">
+<meta property="article:tag" content="pwn">
+<meta property="article:tag" content="python2">
+<meta property="article:tag" content="ctf">
+<meta property="article:tag" content="how2heap">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.imgdb.cn/item/61151a175132923bf82e251f.jpg">
+
+
+<link rel="canonical" href="https://mark0519.github.io/2021/08/12/pwn-how2heap-2-23/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>pwn-how2heap-2.23 | Mark`s blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Mark`s blog</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#how2heap-libc-2-23"><span class="nav-number">1.</span> <span class="nav-text">how2heap libc-2.23</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#0x00-pre"><span class="nav-number">1.1.</span> <span class="nav-text">0x00 pre</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x01-fastbin-dup"><span class="nav-number">1.2.</span> <span class="nav-text">0x01 fastbin_dup</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x03-fastbin-dup-consolidate"><span class="nav-number">1.3.</span> <span class="nav-text">0x03 fastbin_dup_consolidate</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x02-fastbin-dup-into-stack"><span class="nav-number">1.4.</span> <span class="nav-text">0x02 fastbin_dup_into_stack</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x04-unsafe-unlink"><span class="nav-number">1.5.</span> <span class="nav-text">0x04 unsafe_unlink</span></a></li></ol></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">mark0519</p>
+  <div class="site-description" itemprop="description">大一在读，菜鸡pwn手~</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">56</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/mark0519" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;mark0519" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:sunjiajun@bupt.edu.cn" title="E-Mail → mailto:sunjiajun@bupt.edu.cn" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://mark0519.github.io/2021/08/12/pwn-how2heap-2-23/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="mark0519">
+      <meta itemprop="description" content="大一在读，菜鸡pwn手~">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Mark`s blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          pwn-how2heap-2.23
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2021-08-12 20:37:28 / 修改时间：22:13:31" itemprop="dateCreated datePublished" datetime="2021-08-12T20:37:28+08:00">2021-08-12</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="how2heap-libc-2-23"><a href="#how2heap-libc-2-23" class="headerlink" title="how2heap libc-2.23"></a>how2heap libc-2.23</h1><h2 id="0x00-pre"><a href="#0x00-pre" class="headerlink" title="0x00 pre"></a>0x00 pre</h2><p>一直没有好好学过how2heap QAQ</p>
+<p>是时候好好整理下这玩意了，就从libc- 2.23开始吧！</p>
+<a id="more"></a>
+
+<h2 id="0x01-fastbin-dup"><a href="#0x01-fastbin-dup" class="headerlink" title="0x01 fastbin_dup"></a>0x01 fastbin_dup</h2><p>fastbin 的double free，没啥好说的，就是libc-2.23对double free的检查只是看是不是fistbin list的第一个（也就是上一次free）</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">a=<span class="built_in">malloc</span>(<span class="number">0x30</span>);</span><br><span class="line">b=<span class="built_in">malloc</span>(<span class="number">0x30</span>);</span><br><span class="line">c=<span class="built_in">malloc</span>(<span class="number">0x30</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">free</span>(a);</span><br><span class="line"><span class="built_in">free</span>(b);</span><br><span class="line"><span class="built_in">free</span>(a);</span><br><span class="line"><span class="comment">//[fastbin] ==&gt; main_arena -&gt; a -&gt; b -&gt; a </span></span><br></pre></td></tr></table></figure>
+
+<p>这玩意没啥好说的。。。</p>
+<h2 id="0x03-fastbin-dup-consolidate"><a href="#0x03-fastbin-dup-consolidate" class="headerlink" title="0x03 fastbin_dup_consolidate"></a>0x03 fastbin_dup_consolidate</h2><p>这里介绍是libc-2.23的fastbin_dup_consolidate，更高版本会不太一样</p>
+<p>话说这里就出现了知识盲区，我果然需要系统的补一下how2heap ……</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdint.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">void</span>* p1 = <span class="built_in">malloc</span>(<span class="number">0x40</span>);</span><br><span class="line">  <span class="keyword">void</span>* p2 = <span class="built_in">malloc</span>(<span class="number">0x40</span>);</span><br><span class="line">  <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Allocated two fastbins: p1=%p p2=%p\n&quot;</span>, p1, p2);</span><br><span class="line">  <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Now free p1!\n&quot;</span>);</span><br><span class="line">  <span class="built_in">free</span>(p1);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">void</span>* p3 = <span class="built_in">malloc</span>(<span class="number">0x400</span>);</span><br><span class="line">  <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Allocated large bin to trigger malloc_consolidate(): p3=%p\n&quot;</span>, p3);</span><br><span class="line">  <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;In malloc_consolidate(), p1 is moved to the unsorted bin.\n&quot;</span>);</span><br><span class="line">  <span class="built_in">free</span>(p1);</span><br><span class="line">  <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Trigger the double free vulnerability!\n&quot;</span>);</span><br><span class="line">  <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;We can pass the check in malloc() since p1 is not fast top.\n&quot;</span>);</span><br><span class="line">  <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Now p1 is in unsorted bin and fast bin. So we&#x27;will get it twice: %p %p\n&quot;</span>, <span class="built_in">malloc</span>(<span class="number">0x40</span>), <span class="built_in">malloc</span>(<span class="number">0x40</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过调试发现，在第一次执行完<code> free(p1);</code>时，p1正常会被放入fastbin，</p>
+<p>但是当执行完<code>void* p3 = malloc(0x400);</code>之后，即申请了一个largebin大小的chunk之后，会执行malloc_consolidate()，这个函数会遍历所有的 fastbin 把里面的 chunk 该合并合并，该清楚使用就标志清楚使用标志，在2.27或更高版本的libc中会全部插入 unsorted bin 中，而在libc-2.23中则会跳过这个步骤将这些chunk放到属于他们的bins中（同时fastbin清空）</p>
+<p>在这里就会把p1放入smallbins中</p>
+<p><img src="https://pic.imgdb.cn/item/61151a175132923bf82e251f.jpg"></p>
+<p>在下一次 free 的时候，判断是不是 double free 仅仅根据从同一个大小的 fastbin 中拿出第一个 bin，比较地址是不是相同，而我们的 chunk 早到其他bins中去了。所以现在 fastbin 和samllbins中都有同一个 chunk也就是我们可以把它 malloc() 出来两次。</p>
+<p><img src="https://pic.imgdb.cn/item/61151b705132923bf83119bc.jpg"></p>
+<p>上图为 在ptmalloc的管理中，同一个chunk[0x602000]同时属于fastbins和smallbins。</p>
+<p><img src="https://pic.imgdb.cn/item/61151c015132923bf8324cbc.jpg"></p>
+<p>这同样达到了doublefree的效果。</p>
+<h2 id="0x02-fastbin-dup-into-stack"><a href="#0x02-fastbin-dup-into-stack" class="headerlink" title="0x02 fastbin_dup_into_stack"></a>0x02 fastbin_dup_into_stack</h2><p>通过doublefree手段将chunk指针指向栈上</p>
+<p><img src="https://pic.imgdb.cn/item/6115230a5132923bf841ca97.jpg"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;This file extends on fastbin_dup.c by tricking malloc into\n&quot;</span></span><br><span class="line">	       <span class="string">&quot;returning a pointer to a controlled location (in this case, the stack).\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span> stack_var;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;The address we want malloc() to return is %p.\n&quot;</span>, <span class="number">8</span>+(<span class="keyword">char</span> *)&amp;stack_var);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Allocating 3 buffers.\n&quot;</span>);</span><br><span class="line">	<span class="keyword">int</span> *a = <span class="built_in">malloc</span>(<span class="number">8</span>);</span><br><span class="line">	<span class="keyword">int</span> *b = <span class="built_in">malloc</span>(<span class="number">8</span>);</span><br><span class="line">	<span class="keyword">int</span> *c = <span class="built_in">malloc</span>(<span class="number">8</span>);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;1st malloc(8): %p\n&quot;</span>, a);</span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;2nd malloc(8): %p\n&quot;</span>, b);</span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;3rd malloc(8): %p\n&quot;</span>, c);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Freeing the first one...\n&quot;</span>);</span><br><span class="line">	<span class="built_in">free</span>(a);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;If we free %p again, things will crash because %p is at the top of the free list.\n&quot;</span>, a, a);</span><br><span class="line">	<span class="comment">// free(a);</span></span><br><span class="line"></span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;So, instead, we&#x27;ll free %p.\n&quot;</span>, b);</span><br><span class="line">	<span class="built_in">free</span>(b);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Now, we can free %p again, since it&#x27;s not the head of the free list.\n&quot;</span>, a);</span><br><span class="line">	<span class="built_in">free</span>(a);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Now the free list has [ %p, %p, %p ]. &quot;</span></span><br><span class="line">		<span class="string">&quot;We&#x27;ll now carry out our attack by modifying data at %p.\n&quot;</span>, a, b, a, a);</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span> *d = <span class="built_in">malloc</span>(<span class="number">8</span>);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;1st malloc(8): %p\n&quot;</span>, d);</span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;2nd malloc(8): %p\n&quot;</span>, <span class="built_in">malloc</span>(<span class="number">8</span>));</span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Now the free list has [ %p ].\n&quot;</span>, a);</span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Now, we have access to %p while it remains at the head of the free list.\n&quot;</span></span><br><span class="line">		<span class="string">&quot;so now we are writing a fake free size (in this case, 0x20) to the stack,\n&quot;</span></span><br><span class="line">		<span class="string">&quot;so that malloc will think there is a free chunk there and agree to\n&quot;</span></span><br><span class="line">		<span class="string">&quot;return a pointer to it.\n&quot;</span>, a);</span><br><span class="line">	stack_var = <span class="number">0x20</span>;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Now, we overwrite the first 8 bytes of the data at %p to point right before the 0x20.\n&quot;</span>, a);</span><br><span class="line">	*d = (<span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="keyword">long</span>) (((<span class="keyword">char</span>*)&amp;stack_var) - <span class="keyword">sizeof</span>(d));</span><br><span class="line"></span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;3rd malloc(8): %p, putting the stack address on the free list\n&quot;</span>, <span class="built_in">malloc</span>(<span class="number">8</span>));</span><br><span class="line">	<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;4th malloc(8): %p\n&quot;</span>, <span class="built_in">malloc</span>(<span class="number">8</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>简单来说就是利用doublefree使得fastbins链上出现：main_arena -&gt; chunk1 -&gt; chunk2 -&gt; chunk1</p>
+<p>之后为了满足创建chunk时的size位检查，在栈上填入他的size位，之后申请chunk1，chunk2，</p>
+<p>此时fastbins链上仍然还有：main_arena -&gt; chunk1</p>
+<p>然后我们在chunk1中填入符合size检查的栈上的地址，这对free的chunk来说其实正是他的fd位，填完之后</p>
+<p>此时fastbins链上会出现：main_arena -&gt; chunk1 -&gt; stack</p>
+<p>之后我们在申请两次chunk，即可得到在栈上的chunk</p>
+<h2 id="0x04-unsafe-unlink"><a href="#0x04-unsafe-unlink" class="headerlink" title="0x04 unsafe_unlink"></a>0x04 unsafe_unlink</h2><p>Unlink故名思义，取消链接，是内存管理对堆块（chunk）的一种拆离手段。简单来说，就是将一个chunk从双向链表中拆离下来。显然，这种利用Unlink的手段针对的是除fastbin以外的其他几个bin链。</p>
+<p>我自己的理解Unlink就是在一个<strong>双向链表</strong>中，如果出现有<strong>物理相邻</strong>的两个区块且都是被free的状态，那么ptmalloc的unlink机制就会被触发，会将这两个chunk合并为一个被free状态的大chunk并从原来的链表中取出放入新的适合他位置的链表。</p>
+<p>unsafe unlink 是利用<code>unlink</code>将已经构造好的 chunk 块释放掉达到任意地址写的目的。</p>
+<p>未完。。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>mark0519
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://mark0519.github.io/2021/08/12/pwn-how2heap-2-23/" title="pwn-how2heap-2.23">https://mark0519.github.io/2021/08/12/pwn-how2heap-2-23/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/pwn/" rel="tag"># pwn</a>
+              <a href="/tags/python2/" rel="tag"># python2</a>
+              <a href="/tags/ctf/" rel="tag"># ctf</a>
+              <a href="/tags/how2heap/" rel="tag"># how2heap</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/08/08/pwn-RARctf-guess/" rel="prev" title="pwn-RARctf-guess">
+                  <i class="fa fa-chevron-left"></i> pwn-RARctf-guess
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">mark0519</span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div> <!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div> -->
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
