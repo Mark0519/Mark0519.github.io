@@ -24,32 +24,37 @@
     var CONFIG = {"hostname":"mark0519.github.io","root":"/","scheme":"Pisces","version":"8.0.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
   </script>
 
-  <meta name="description" content="大一在读，菜鸡pwn手~">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Mark&#96;s blog">
-<meta property="og:url" content="https://mark0519.github.io/index.html">
+  <meta name="description" content="2021祥云杯 lemon分析在第一个game里，使得条件成立可以将flag放到栈上，同时打印栈上name的地址后三位 第二个game里的color功能存在堆溢出，不过只能使用一次，同时bss段上的一个指针存放idx &#x3D;0，1，2的3个0x30的chunk的地址，我把这些0x30称之为信息chunk，每个信息chunk里在放入真正存放数据的chunk以及申请这个chunk时输入的size，同时还设">
+<meta property="og:type" content="article">
+<meta property="og:title" content="pwn-2021祥云杯lemon">
+<meta property="og:url" content="https://mark0519.github.io/2021/08/22/pwn-2021%E7%A5%A5%E4%BA%91%E6%9D%AFlemon/index.html">
 <meta property="og:site_name" content="Mark&#96;s blog">
-<meta property="og:description" content="大一在读，菜鸡pwn手~">
+<meta property="og:description" content="2021祥云杯 lemon分析在第一个game里，使得条件成立可以将flag放到栈上，同时打印栈上name的地址后三位 第二个game里的color功能存在堆溢出，不过只能使用一次，同时bss段上的一个指针存放idx &#x3D;0，1，2的3个0x30的chunk的地址，我把这些0x30称之为信息chunk，每个信息chunk里在放入真正存放数据的chunk以及申请这个chunk时输入的size，同时还设">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-08-22T13:54:03.000Z">
+<meta property="article:modified_time" content="2021-08-22T13:59:19.229Z">
 <meta property="article:author" content="mark0519">
-<meta property="article:tag" content="mark0519,C,mark,blog,ctf,pwn">
+<meta property="article:tag" content="pwn">
+<meta property="article:tag" content="python2">
+<meta property="article:tag" content="ctf">
+<meta property="article:tag" content="wp">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://mark0519.github.io/">
+<link rel="canonical" href="https://mark0519.github.io/2021/08/22/pwn-2021%E7%A5%A5%E4%BA%91%E6%9D%AFlemon/">
 
 
 <script class="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : true,
-    isPost : false,
+    isHome : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>Mark`s blog</title>
+  <title>pwn-2021祥云杯lemon | Mark`s blog</title>
   
 
 
@@ -164,7 +169,7 @@
 
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -177,6 +182,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#2021%E7%A5%A5%E4%BA%91%E6%9D%AF-lemon"><span class="nav-number">1.</span> <span class="nav-text">2021祥云杯 lemon</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">1.1.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%8C%E6%95%B4exp"><span class="nav-number">1.2.</span> <span class="nav-text">完整exp</span></a></li></ol></li></ol></div>
         </section>
         <!--/noindex-->
 
@@ -232,82 +238,12 @@
 </noscript>
 
 
-    <div class="main-inner index posts-expand">
+    <div class="main-inner post posts-expand">
       
 
       
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mark0519.github.io/2020/10/25/look_here/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="mark0519">
-      <meta itemprop="description" content="大一在读，菜鸡pwn手~">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Mark`s blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/10/25/look_here/" class="post-title-link" itemprop="url">Hello World!</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-10-25 15:08:44" itemprop="dateCreated datePublished" datetime="2020-10-25T15:08:44+08:00">2020-10-25</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-13 23:38:30" itemprop="dateModified" datetime="2021-07-13T23:38:30+08:00">2021-07-13</time>
-      </span>
 
   
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h2 id="搭个博客防止我偷懒"><a href="#搭个博客防止我偷懒" class="headerlink" title="搭个博客防止我偷懒~"></a>搭个博客防止我偷懒~</h2>
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
 
 
 <div class="post-block">
@@ -327,10 +263,9 @@
       <meta itemprop="name" content="Mark`s blog">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/08/22/pwn-2021%E7%A5%A5%E4%BA%91%E6%9D%AFlemon/" class="post-title-link" itemprop="url">pwn-2021祥云杯lemon</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          pwn-2021祥云杯lemon
+        </h1>
 
         <div class="post-meta-container">
           <div class="post-meta">
@@ -345,6 +280,13 @@
     </span>
 
   
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
 </div>
 
         </div>
@@ -354,7 +296,7 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h1 id="2021祥云杯-lemon"><a href="#2021祥云杯-lemon" class="headerlink" title="2021祥云杯 lemon"></a>2021祥云杯 lemon</h1><h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>在第一个game里，使得条件成立可以将flag放到栈上，同时打印栈上name的地址后三位</p>
+        <h1 id="2021祥云杯-lemon"><a href="#2021祥云杯-lemon" class="headerlink" title="2021祥云杯 lemon"></a>2021祥云杯 lemon</h1><h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>在第一个game里，使得条件成立可以将flag放到栈上，同时打印栈上name的地址后三位</p>
 <p>第二个game里的color功能存在堆溢出，不过只能使用一次，同时bss段上的一个指针存放idx =0，1，2的3个0x30的chunk的地址，我把这些0x30称之为信息chunk，每个信息chunk里在放入真正存放数据的chunk以及申请这个chunk时输入的size，同时还设置了一个inuse位。eat功能会打印堆地址（1/2的概率成功，否则直接退出）</p>
 <p>同时在malloc的时候，虽然存在tcache，但是源码自己写了个检查size位的函数来验证申请的区块。</p>
 <p>由于开启了seccomp禁用了system，所以没法构造one_gadget，但是不管咋样肯定要先泄露libc基地址</p>
@@ -381,7 +323,6 @@
 
 
 
-      
     </div>
 
     
@@ -389,625 +330,47 @@
     
 
     <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mark0519.github.io/2021/08/12/pwn-how2heap-2-23/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="mark0519">
-      <meta itemprop="description" content="大一在读，菜鸡pwn手~">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Mark`s blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2021/08/12/pwn-how2heap-2-23/" class="post-title-link" itemprop="url">pwn-how2heap-2.23</a>
-        </h2>
 
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-08-12 20:37:28" itemprop="dateCreated datePublished" datetime="2021-08-12T20:37:28+08:00">2021-08-12</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-08-16 17:31:59" itemprop="dateModified" datetime="2021-08-16T17:31:59+08:00">2021-08-16</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="how2heap-libc-2-23"><a href="#how2heap-libc-2-23" class="headerlink" title="how2heap libc-2.23"></a>how2heap libc-2.23</h1><h2 id="0x00-pre"><a href="#0x00-pre" class="headerlink" title="0x00 pre"></a>0x00 pre</h2><p>一直没有好好学过how2heap QAQ</p>
-<p>是时候好好整理下这玩意了，就从libc- 2.23开始吧！</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/12/pwn-how2heap-2-23/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mark0519.github.io/2021/08/08/pwn-RARctf-guess/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="mark0519">
-      <meta itemprop="description" content="大一在读，菜鸡pwn手~">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Mark`s blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/08/08/pwn-RARctf-guess/" class="post-title-link" itemprop="url">pwn-RARctf-guess</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2021-08-08 19:37:55" itemprop="dateCreated datePublished" datetime="2021-08-08T19:37:55+08:00">2021-08-08</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-08-12 21:04:43" itemprop="dateModified" datetime="2021-08-12T21:04:43+08:00">2021-08-12</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="RARctf-guess"><a href="#RARctf-guess" class="headerlink" title="RARctf guess"></a>RARctf guess</h1><h1 id="0x00-分析"><a href="#0x00-分析" class="headerlink" title="0x00  分析"></a>0x00  分析</h1><p>一共可以爆破8个字节</p>
-<p>前七次爆破canary（canary以00结尾）</p>
-<p>第八次爆破ret</p>
-<p>一次溢出 填充canary之后修改ret的最后3个字节位为one gadget</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/08/pwn-RARctf-guess/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mark0519.github.io/2021/08/07/pwn-%E5%B7%85%E5%B3%B0%E6%9E%81%E5%AE%A2-GHOST/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="mark0519">
-      <meta itemprop="description" content="大一在读，菜鸡pwn手~">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Mark`s blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/08/07/pwn-%E5%B7%85%E5%B3%B0%E6%9E%81%E5%AE%A2-GHOST/" class="post-title-link" itemprop="url">pwn-巅峰极客-GHOST</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-08-07 13:24:38 / 修改时间：13:26:45" itemprop="dateCreated datePublished" datetime="2021-08-07T13:24:38+08:00">2021-08-07</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="巅峰极客-GHOST"><a href="#巅峰极客-GHOST" class="headerlink" title="巅峰极客-GHOST"></a>巅峰极客-GHOST</h1><p>2021巅峰极客pwn</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/07/pwn-%E5%B7%85%E5%B3%B0%E6%9E%81%E5%AE%A2-GHOST/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mark0519.github.io/2021/08/04/pwn-SROP/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="mark0519">
-      <meta itemprop="description" content="大一在读，菜鸡pwn手~">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Mark`s blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/08/04/pwn-SROP/" class="post-title-link" itemprop="url">pwn-SROP</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-08-04 21:12:38 / 修改时间：20:18:26" itemprop="dateCreated datePublished" datetime="2021-08-04T21:12:38+08:00">2021-08-04</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="SROP"><a href="#SROP" class="headerlink" title="SROP"></a>SROP</h1><h2 id="srop原理"><a href="#srop原理" class="headerlink" title="srop原理"></a>srop原理</h2><p>内核在 signal 信号处理的过程中，内核主要做的工作就是为进程保存上下文，并且恢复上下文。这个主要的变动都在 Signal Frame 中。但是需要注意的是：</p>
+<div class="post-copyright">
 <ul>
-<li>Signal Frame 被保存在用户的地址空间中，所以用户是可以读写的。</li>
-<li>由于内核与信号处理程序无关 (kernel agnostic about signal handlers)，它并不会去记录这个 signal 对应的 Signal Frame，所以当执行 sigreturn 系统调用时，此时的 Signal Frame 并不一定是之前内核为用户进程保存的 Signal Frame。</li>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>mark0519
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://mark0519.github.io/2021/08/22/pwn-2021%E7%A5%A5%E4%BA%91%E6%9D%AFlemon/" title="pwn-2021祥云杯lemon">https://mark0519.github.io/2021/08/22/pwn-2021祥云杯lemon/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
 </ul>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/04/pwn-SROP/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/pwn/" rel="tag"># pwn</a>
+              <a href="/tags/python2/" rel="tag"># python2</a>
+              <a href="/tags/ctf/" rel="tag"># ctf</a>
+              <a href="/tags/wp/" rel="tag"># wp</a>
+          </div>
+
         
-      
-    </div>
 
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/08/12/pwn-how2heap-2-23/" rel="prev" title="pwn-how2heap-2.23">
+                  <i class="fa fa-chevron-left"></i> pwn-how2heap-2.23
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
     </footer>
   </article>
 </div>
 
 
 
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mark0519.github.io/2021/08/01/pwn-DASCTF-July-EasyHeap/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="mark0519">
-      <meta itemprop="description" content="大一在读，菜鸡pwn手~">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Mark`s blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/08/01/pwn-DASCTF-July-EasyHeap/" class="post-title-link" itemprop="url">pwn-DASCTF July- EasyHeap</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-08-01 21:51:51 / 修改时间：22:02:04" itemprop="dateCreated datePublished" datetime="2021-08-01T21:51:51+08:00">2021-08-01</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="DASCTF-July-EasyHeap"><a href="#DASCTF-July-EasyHeap" class="headerlink" title="DASCTF July - EasyHeap"></a>DASCTF July - EasyHeap</h1><p>果然名字里又有ez的题目都不简单。。。。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/01/pwn-DASCTF-July-EasyHeap/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mark0519.github.io/2021/07/30/pwn-%E9%A2%98%E7%9B%AEdocker%E6%90%AD%E5%BB%BA/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="mark0519">
-      <meta itemprop="description" content="大一在读，菜鸡pwn手~">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Mark`s blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/07/30/pwn-%E9%A2%98%E7%9B%AEdocker%E6%90%AD%E5%BB%BA/" class="post-title-link" itemprop="url">pwn-题目docker搭建</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-07-30 17:06:07 / 修改时间：17:09:20" itemprop="dateCreated datePublished" datetime="2021-07-30T17:06:07+08:00">2021-07-30</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="题目docker搭建"><a href="#题目docker搭建" class="headerlink" title="题目docker搭建"></a>题目docker搭建</h1><p>最近在研究pwn出题，顺便研究下docker</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/07/30/pwn-%E9%A2%98%E7%9B%AEdocker%E6%90%AD%E5%BB%BA/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mark0519.github.io/2021/07/28/pwn-GoogleCTF-2018-ToDo/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="mark0519">
-      <meta itemprop="description" content="大一在读，菜鸡pwn手~">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Mark`s blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/07/28/pwn-GoogleCTF-2018-ToDo/" class="post-title-link" itemprop="url">pwn-GoogleCTF-2018-ToDo</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-07-28 19:08:56 / 修改时间：19:12:56" itemprop="dateCreated datePublished" datetime="2021-07-28T19:08:56+08:00">2021-07-28</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="GoogleCTF-2018-Fridge-ToDo-List"><a href="#GoogleCTF-2018-Fridge-ToDo-List" class="headerlink" title="GoogleCTF-2018 Fridge ToDo List"></a>GoogleCTF-2018 Fridge ToDo List</h1><p>开启了PIE，无法在内存中确定具体的地址了。现在先看看程序有什么功能，1-6个选项。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/07/28/pwn-GoogleCTF-2018-ToDo/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://mark0519.github.io/2021/07/26/pwn-cybricCTF-GrOSs1%E5%A4%8D%E7%8E%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="mark0519">
-      <meta itemprop="description" content="大一在读，菜鸡pwn手~">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Mark`s blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/07/26/pwn-cybricCTF-GrOSs1%E5%A4%8D%E7%8E%B0/" class="post-title-link" itemprop="url">pwn-cybricCTF-GrOSs1复现</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-      
-
-      <time title="创建时间：2021-07-26 14:44:05 / 修改时间：18:37:11" itemprop="dateCreated datePublished" datetime="2021-07-26T14:44:05+08:00">2021-07-26</time>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h1 id="cybricCTF-GrOSs1-复现"><a href="#cybricCTF-GrOSs1-复现" class="headerlink" title="cybricCTF GrOSs1 复现"></a>cybricCTF GrOSs1 复现</h1><p>cybricCTF真难啊 淦，全程几乎没有参与感，只能赛后复现下了QAQ</p>
-<p>另：作为一个pwn手，还得好好学习re，不然pwn题源文件都看不懂。。。。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/07/26/pwn-cybricCTF-GrOSs1%E5%A4%8D%E7%8E%B0/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-
-  
-  <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
-  </nav>
 
 
 
